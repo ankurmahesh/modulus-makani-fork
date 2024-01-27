@@ -112,7 +112,7 @@ class MetricsHandler:
             channel_reduction="mean",
             batch_reduction="sum",
         ).to(self.device)
-        self.l1_handle = torch.compile(self.l1_handle, mode="max-autotune-no-cudagraphs")
+        #self.l1_handle = torch.compile(self.l1_handle, mode="max-autotune-no-cudagraphs")
 
         self.rmse_handle = GeometricRMSE(
             quadrature_rule_type,
@@ -123,7 +123,7 @@ class MetricsHandler:
             channel_reduction="none",
             batch_reduction="none",
         ).to(self.device)
-        self.rmse_handle = torch.compile(self.rmse_handle, mode="max-autotune-no-cudagraphs")
+        #self.rmse_handle = torch.compile(self.rmse_handle, mode="max-autotune-no-cudagraphs")
 
         self.acc_handle = GeometricACC(
             quadrature_rule_type,
@@ -134,7 +134,7 @@ class MetricsHandler:
             channel_reduction="none",
             batch_reduction="sum",
         ).to(self.device)
-        self.acc_handle = torch.compile(self.acc_handle, mode="max-autotune-no-cudagraphs")
+        #self.acc_handle = torch.compile(self.acc_handle, mode="max-autotune-no-cudagraphs")
 
         self.do_gather_input = False
         if comm.get_size("spatial") > 1:

@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import torch._dynamo
+torch._dynamo.config.suppress_errors = True
 import os
 import numpy as np
 import argparse
@@ -29,6 +31,14 @@ from makani.utils import comm
 # import trainer
 from makani.utils.parse_dataset_metada import parse_dataset_metadata
 from makani import Trainer
+
+
+def set_seed(seed):                                       
+    logging.info("Using seed {}".format(seed))                          
+    import random
+    random.seed(seed)                                                   
+    np.random.seed(seed)                                                
+    torch.manual_seed(seed)                                             
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -64,11 +74,19 @@ if __name__ == "__main__":
     parser.add_argument("--disable_ddp", action="store_true")
     parser.add_argument("--enable_grad_anomaly_detection", action="store_true")
 
+    parser.add_argument(
+        "--initialization_seed",
+        default=None,
+        type=int,
+        help='The seed to use for the random number initialization'
+    )
+
     # parse
     args = parser.parse_args()
 
     # parse parameters
     params = YParams(os.path.abspath(args.yaml_config), args.config)
+    params["initialization_seed"] = args.initialization_seed
     params["epsilon_factor"] = args.epsilon_factor
 
     # distributed
@@ -170,7 +188,9 @@ if __name__ == "__main__":
         params, _ = parse_dataset_metadata(params["metadata_json_path"], params=params)
     else:
         raise RuntimeError(f"Error, please specify a dataset descriptor file in json format")
-
+    
+    if args.initialization_seed is not None:
+        set_seed(args.initialization_seed)
     # instantiate trainer / inference / ensemble object
     if args.mode == "train":
         trainer = Trainer(params, world_rank)
@@ -181,3 +201,4 @@ if __name__ == "__main__":
         trainer.test_autoregression_pipeline()
     else:
         raise ValueError(f"Unknown training mode {args.mode}")
+

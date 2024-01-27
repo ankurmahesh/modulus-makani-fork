@@ -62,6 +62,8 @@ class CheckpointSaver(Trainer):
         self.optimizer = None
         self.epoch = None
         self.scheduler = None
+        import logging
+        self.logger = logging.getLogger()
 
         # print model
         if self.world_rank == 0:
@@ -76,19 +78,20 @@ def get_params(path):
 def save_checkpoint(path, output_path, rank, world_size, store_path):
     package = LocalPackage(path)
     params = get_params(path)
-    store = dist.FileStore(store_path, world_size)
+    #store = dist.FileStore(store_path, world_size)
     # setup distributed
-    dist.init_process_group(store=store, backend="nccl", rank=rank, world_size=world_size)
+    #dist.init_process_group(store=store, backend="nccl", rank=rank, world_size=world_size)
     # adjust checkpoint_path to be inside of ``path``. The checkpoint may not be in
     # the same location it was during training.
     checkpoint_template = os.path.basename(params.checkpoint_path)
     checkpoint_path = os.path.join(path, "training_checkpoints", checkpoint_template)
     params.log_to_wandb = False
-    with torch.cuda.device(dist.get_rank() % torch.cuda.device_count()):
+    #with torch.cuda.device(dist.get_rank() % torch.cuda.device_count()):
+    with torch.cuda.device(rank % torch.cuda.device_count()):
         _load_static_data(package, params)
         model_parallel_sizes = params.get("model_parallel_sizes", [1])
         model_parallel_names = params.get("model_parallel_names", ["model"])
-        params.model_parallel_size = comm.init_model_parallel_info(sizes=model_parallel_sizes, names=model_parallel_names)
+        params.model_parallel_size = comm.init(model_parallel_sizes=model_parallel_sizes, model_parallel_names=model_parallel_names)
         saver = CheckpointSaver(params, world_rank=comm.get_world_rank())
         saver.restore_checkpoint(checkpoint_path, checkpoint_mode=params["load_checkpoint"])
         output_checkpoint_path = os.path.join(output_path, MODEL_PACKAGE_CHECKPOINT_PATH)
@@ -126,8 +129,12 @@ if __name__ == "__main__":
     f = tempfile.mktemp()
     params = get_params(args.experiment_root)
     nproc = len(params.model_parallel_sizes)
-    torch.multiprocessing.spawn(
-        partial(save_checkpoint, args.experiment_root, args.output),
-        args=(nproc, f),
-        nprocs=nproc,
-    )
+    rank = int(os.environ["RANK"])
+    world_size = int(os.environ["WORLD_SIZE"])
+    save_checkpoint(args.experiment_root, args.output, rank, world_size, f)
+
+    #torch.multiprocessing.spawn(
+    #    partial(save_checkpoint, args.experiment_root, args.output),
+    #    args=(nproc, f),
+    #    nprocs=nproc,
+    #)

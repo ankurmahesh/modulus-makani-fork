@@ -1,24 +1,25 @@
 base_config: &BASE_CONFIG
 
     # metadata file for the dataset
-    metadata_json_path: "/metadata/data.json"
-
-    # data 
-    train_data_path: "/train"
-    valid_data_path: "/test"
-    exp_dir: "/runs"
-    n_years: 1
-    img_shape_x: 721
-    img_shape_y: 1440
-
-    # files used for normalization of the data
-    min_path: "/stats/mins.npy"
-    max_path: "/stats/maxs.npy"
-    time_means_path:   "/stats/time_means.npy"
-    global_means_path: "/stats/global_means.npy"
-    global_stds_path:  "/stats/global_stds.npy"
-    time_diff_means_path: "/stats/time_diff_means.npy"
-    time_diff_stds_path: "/stats/time_diff_stds.npy"
+    # metadata file for the dataset                                     
+    metadata_json_path: "/pscratch/sd/p/pharring/74var-6hourly/staging/data.json" 
+                                                                        
+    # data                                                              
+    train_data_path: "/pscratch/sd/p/pharring/74var-6hourly/staging/train"
+    valid_data_path: "/pscratch/sd/p/pharring/74var-6hourly/staging/valid"
+    exp_dir: "/pscratch/sd/a/amahesh/fcn_training/modulus-makani_runs-0.1.0/"     
+    n_years: 1                                                          
+    img_shape_x: 721                                                    
+    img_shape_y: 1440                                                   
+                                                                        
+    # files used for normalization of the data                          
+    min_path: "/pscratch/sd/p/pharring/74var-6hourly/staging/stats/mins.npy"
+    max_path: "/pscratch/sd/p/pharring/74var-6hourly/staging/stats/maxs.npy"
+    time_means_path:   "/pscratch/sd/p/pharring/74var-6hourly/staging/stats/time_means.npy"
+    global_means_path: "/pscratch/sd/p/pharring/74var-6hourly/staging/stats/global_means.npy"
+    global_stds_path:  "/pscratch/sd/p/pharring/74var-6hourly/staging/stats/global_stds.npy"
+    time_diff_means_path: "/pscratch/sd/p/pharring/74var-6hourly/staging/stats/time_diff_means.npy"
+    time_diff_stds_path: "/pscratch/sd/p/pharring/74var-6hourly/staging/stats/time_diff_stds.npy"
 
     # architecture related 
     nettype: "SFNO"
@@ -89,7 +90,7 @@ base_config: &BASE_CONFIG
     normalize_residual: false
 
     # define channels to be read from data
-    channel_names: ["u10m", "v10m", "u100m", "v100m", "t2m", "sp", "msl", "tcwv", "u50", "u100", "u150", "u200", "u250", "u300", "u400", "u500", "u600", "u700", "u850", "u925", "u1000", "v50", "v100", "v150", "v200", "v250", "v300", "v400", "v500", "v600", "v700", "v850", "v925", "v1000", "z50", "z100", "z150", "z200", "z250", "z300", "z400", "z500", "z600", "z700", "z850", "z925", "z1000", "t50", "t100", "t150", "t200", "t250", "t300", "t400", "t500", "t600", "t700", "t850", "t925", "t1000", "q50", "q100", "q150", "q200", "q250", "q300", "q400", "q500", "q600", "q700", "q850", "q925", "q1000"]
+    channel_names: ["u10m", "v10m", "u100m", "v100m", "t2m", "sp", "msl", "tcwv", "2d", "u50", "u100", "u150", "u200", "u250", "u300", "u400", "u500", "u600", "u700", "u850", "u925", "u1000", "v50", "v100", "v150", "v200", "v250", "v300", "v400", "v500", "v600", "v700", "v850", "v925", "v1000", "z50", "z100", "z150", "z200", "z250", "z300", "z400", "z500", "z600", "z700", "z850", "z925", "z1000", "t50", "t100", "t150", "t200", "t250", "t300", "t400", "t500", "t600", "t700", "t850", "t925", "t1000", "q50", "q100", "q150", "q200", "q250", "q300", "q400", "q500", "q600", "q700", "q850", "q925", "q1000"]
     normalization: "zscore" # options zscore or minmax or none
 
     # extra channels
@@ -100,9 +101,9 @@ base_config: &BASE_CONFIG
     add_zenith: !!bool True
     # invariants
     add_orography: !!bool True
-    orography_path: /invariants/orography.nc
+    orography_path: /global/cfs/cdirs/m3522/cmip6/ERA5/e5.oper.invariant/197901/e5.oper.invariant.128_129_z.ll025sc.1979010100_1979010100.nc
     add_landmask: !!bool True
-    landmask_path: /invariants/land_sea_mask.nc
+    landmask_path: /global/cfs/cdirs/m3522/cmip6/ERA5/e5.oper.invariant/197901/e5.oper.invariant.128_172_lsm.ll025sc.1979010100_1979010100.nc
 
     finetune: !!bool False
 
@@ -120,25 +121,27 @@ base_config: &BASE_CONFIG
     crop_size_y: None
 
     # required for validation and scoring
-    inf_data_path: "/out_of_sample"
+    inf_data_path: "/pscratch/sd/p/pharring/74var-6hourly/staging/out_of_sample"
 
     # Weights and biases configuration
     wandb_name: None # If None, wandb will assign a random name, recommended
-    wandb_group: "sfnonet development" # If None, will be "era5_wind" + config, but you can override it here
-    wandb_project: "sfno architecture validation"
-    wandb_entity: "sfno-large-model-training"
+    wandb_group: "makani" # If None, will be "era5_wind" + config, but you can override it here
+    wandb_project: "ERA5_sfno"
+    wandb_entity: "weatherbenching"
+
+    pos_drop_rate: 0.1
 
 ###########################################################################################################################
-# 73 channels + Q base
+# 74 channels + Q base
 ###########################################################################################################################
 
 # 1 GPUS, h=1, no cuda graphs
 
-base_73chq: &BASELINE_73CHQ
+base_74chq: &BASELINE_74CHQ
     <<: *BASE_CONFIG
 
-base_73chq_finetune: &BASELINE_73CHQ_FINETUNE
-    <<: *BASELINE_73CHQ
+base_74chq_finetune: &BASELINE_74CHQ_FINETUNE
+    <<: *BASELINE_74CHQ
     finetune: !!bool True
     lr: 1E-6
     scheduler: "CosineAnnealingLR"
@@ -146,9 +149,9 @@ base_73chq_finetune: &BASELINE_73CHQ_FINETUNE
     scheduler_T_max: 20
 
 # current best single GPU model
-sfno_linear_73chq_sc3_layers8_edim384_wstgl2:
-    <<: *BASELINE_73CHQ
-    wandb_group: "sfno_linear_73chq_sc3_layers8_edim384_wstgl2"
+sfno_linear_74chq_sc3_layers8_edim384_wstgl2:
+    <<: *BASELINE_74CHQ
+    wandb_group: "sfno_linear_74chq_sc3_layers8_edim384_wstgl2"
 
     embed_dim: 384
     num_layers: 8
@@ -158,17 +161,181 @@ sfno_linear_73chq_sc3_layers8_edim384_wstgl2:
     loss: "weighted squared temp-std geometric l2"
     channel_weights: "auto"
 
-sfno_linear_73chq_sc3_layers8_edim384_asgl2:
-    <<: *BASELINE_73CHQ
-    wandb_group: "sfno_linear_73chq_sc3_layers8_edim384_asgl2"
+sfno_linear_74chq_sc4_layers8_edim620_wstgl2_adamw:
+    <<: *BASELINE_74CHQ
+    wandb_group: "sfno_linear_74chq_sc4_layers8_edim620_wstgl2"
+
+    # log_weights_and_grads: 10
+
+    embed_dim: 620
+    num_layers: 8
+    scale_factor: 4
+    hard_thresholding_fraction: 1.0
+
+    optimizer_type: "AdamW"
+
+    scheduler: "CosineAnnealingLR"                                      
+    max_epochs: 70                                                      
+    scheduler_T_max: 70                                                 
+
+    loss: "weighted squared temp-std geometric l2"
+    channel_weights: "auto"
+    valid_autoreg_steps: 1
+
+sfno_linear_74chq_sc4_layers8_edim620_wstgl2_adam:
+    <<: *BASELINE_74CHQ
+    wandb_group: "sfno_linear_74chq_sc4_layers8_edim620_wstgl2"
+
+    # log_weights_and_grads: 10
+
+    embed_dim: 620
+    num_layers: 8
+    scale_factor: 4
+    hard_thresholding_fraction: 1.0
+
+    optimizer_type: "Adam"
+
+    scheduler: "CosineAnnealingLR"                                      
+    max_epochs: 70                                                      
+    scheduler_T_max: 70                                                 
+
+    loss: "weighted squared temp-std geometric l2"
+    channel_weights: "auto"
+    valid_autoreg_steps: 1
+
+sfno_linear_74chq_sc4_layers8_edim620_asgl2_adamw:
+    <<: *BASELINE_74CHQ
+    wandb_group: "sfno_linear_74chq_sc4_layers8_edim620_asgl2"
+
+    # log_weights_and_grads: 10
+
+    embed_dim: 620
+    num_layers: 8
+    scale_factor: 4
+    hard_thresholding_fraction: 1.0
+
+    optimizer_type: "AdamW"
+
+    scheduler: "CosineAnnealingLR"                                      
+    max_epochs: 70                                                      
+    scheduler_T_max: 70                                                 
+    loss: "absolute squared geometric l2"
+    valid_autoreg_steps: 1
+
+
+sfno_linear_74chq_sc4_layers8_edim620_asgl2_adam:
+    <<: *BASELINE_74CHQ
+    wandb_group: "sfno_linear_74chq_sc4_layers8_edim620_asgl2"
+
+    # log_weights_and_grads: 10
+
+    embed_dim: 620
+    num_layers: 8
+    scale_factor: 4
+    hard_thresholding_fraction: 1.0
+
+    optimizer_type: "Adam"
+
+    scheduler: "CosineAnnealingLR"                                      
+    max_epochs: 70                                                      
+    scheduler_T_max: 70                                                 
+    loss: "absolute squared geometric l2"
+    valid_autoreg_steps: 1
+
+sfno_linear_74chq_sc2_layers8_edim220_wstgl2:                           
+    <<: *BASELINE_74CHQ                                                 
+    wandb_group: "sfno_linear_74chq_sc2_layers8_edim220_wstgl2-0.1.0"         
+                                                                        
+    embed_dim: 220                                                      
+    num_layers: 8                                                          
+    scale_factor: 2                                                     
+    hard_thresholding_fraction: 1.0                                     
+    scheduler: "CosineAnnealingLR"                                      
+    max_epochs: 70                                                      
+    scheduler_T_max: 70                                                 
+    loss: "weighted squared temp-std geometric l2"                      
+    valid_autoreg_steps: 14 # number of autoregressive steps for validation, 20 steps in total
+
+sfno_linear_74chq_sc1_layers8_edim384_wstgl2:                           
+    <<: *BASELINE_74CHQ                                                 
+    wandb_group: "sfno_linear_74chq_sc1_layers8_edim384_wstgl2-0.1.0"         
+                                                                        
+    embed_dim: 384
+    num_layers: 8                                                          
+    scale_factor: 1
+    hard_thresholding_fraction: 1.0                                     
+    scheduler: "CosineAnnealingLR"                                      
+    max_epochs: 70                                                      
+    scheduler_T_max: 70                                                 
+    loss: "weighted squared temp-std geometric l2"                      
+    valid_autoreg_steps: 1 # number of autoregressive steps for validation, 20 steps in total
+
+
+sfno_linear_74chq_sc1_layers8_edim620_wstgl2:                           
+    <<: *BASELINE_74CHQ                                                 
+    wandb_group: "sfno_linear_74chq_sc1_layers8_edim620_wstgl2-0.1.0"         
+                                                                        
+    embed_dim: 620
+    num_layers: 8                                                          
+    scale_factor: 1
+    hard_thresholding_fraction: 1.0                                     
+    scheduler: "CosineAnnealingLR"                                      
+    max_epochs: 70                                                      
+    scheduler_T_max: 70                                                 
+    loss: "weighted squared temp-std geometric l2"                      
+    valid_autoreg_steps: 1 # number of autoregressive steps for validation, 20 steps in total
+
+sfno_linear_74chq_sc2_layers8_edim620_wstgl2:                           
+    <<: *BASELINE_74CHQ                                                 
+    wandb_group: "sfno_linear_74chq_sc2_layers8_edim620_wstgl2-0.1.0"         
+                                                                        
+    embed_dim: 620
+    num_layers: 8                                                          
+    scale_factor: 2
+    hard_thresholding_fraction: 1.0                                     
+    scheduler: "CosineAnnealingLR"                                      
+    max_epochs: 70                                                      
+    scheduler_T_max: 70                                                 
+    loss: "weighted squared temp-std geometric l2"                      
+    valid_autoreg_steps: 1 # number of autoregressive steps for validation, 20 steps in total
+
+
+sfno_linear_74chq_sc2_layers8_edim820_wstgl2:                           
+    <<: *BASELINE_74CHQ                                                 
+    wandb_group: "sfno_linear_74chq_sc2_layers8_edim820_wstgl2-0.1.0"         
+                                                                        
+    embed_dim: 820
+    num_layers: 8                                                          
+    scale_factor: 2
+    hard_thresholding_fraction: 1.0                                     
+    scheduler: "CosineAnnealingLR"                                      
+    max_epochs: 70                                                      
+    scheduler_T_max: 70                                                 
+    loss: "weighted squared temp-std geometric l2"                      
+    valid_autoreg_steps: 1 # number of autoregressive steps for validation, 20 steps in total
+
+
+sfno_linear_74chq_sc6_layers8_edim384_wstgl2:
+    <<: *BASELINE_74CHQ
+    wandb_group: "sfno_linear_74chq_sc6_layers8_edim384_wstgl2-0.1.0-debug"
 
     # log_weights_and_grads: 10
 
     embed_dim: 384
     num_layers: 8
-    scale_factor: 3
+    scale_factor: 6
     hard_thresholding_fraction: 1.0
 
-    optimizer_type: "Adam"
+    optimizer_type: "AdamW"
 
-    loss: "absolute squared geometric l2"
+    scheduler: "CosineAnnealingLR"                                      
+    max_epochs: 70                                                      
+    scheduler_T_max: 70                                                 
+
+    loss: "weighted squared temp-std geometric l2"
+    channel_weights: "auto"
+    valid_autoreg_steps: 1
+
+    n_train_samples_per_epoch: 32
+    n_eval_samples: 32
+    log_to_wandb: false

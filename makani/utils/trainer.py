@@ -633,6 +633,13 @@ class Trainer:
                 for pg in self.optimizer.param_groups:
                     lr = pg["lr"]
                 wandb.log({"learning rate": lr}, step=self.epoch)
+            
+            if (self.data_parallel_rank == 0) and (self.params.save_checkpoint != "none") and (self.epoch > 64):
+                save_path = self.params.checkpoint_path.replace(".tar", "_epoch{}.tar".format(self.epoch))
+                self.save_checkpoint(
+                    save_path,
+                    checkpoint_mode=self.params["save_checkpoint"],
+                )
 
             if (self.data_parallel_rank == 0) and (self.params.save_checkpoint != "none"):
                 # checkpoint at the end of every epoch
