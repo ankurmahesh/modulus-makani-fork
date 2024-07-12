@@ -52,7 +52,10 @@ class MetricsHandler:
 
         # determine effective time interval and number of steps per day:
         self.dtxdh = params.dt * params.dhours
-        self.dd = 24 // self.dtxdh
+        if params.dt == 0:
+            self.dd = 24 // params.dhours
+        else:
+            self.dd = 24 // self.dtxdh
 
         # select the vars which are actually present
         rmse_var_names = [x for x in rmse_var_names if x in self.channel_names]

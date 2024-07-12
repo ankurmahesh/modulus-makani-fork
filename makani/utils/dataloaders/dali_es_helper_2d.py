@@ -161,7 +161,10 @@ class GeneralES(object):
 
             # read the data
             if self.read_direct:
-                dset.read_direct(inp, np.s_[(local_idx - self.dt * self.n_history) : (local_idx + 1) : self.dt, slice_in, start_x:end_x, start_y:end_y], np.s_[:, start:end, ...])
+                if self.dt == 0:
+                    dset.read_direct(inp, np.s_[(local_idx - self.dt * self.n_history) : (local_idx + 1), slice_in, start_x:end_x, start_y:end_y], np.s_[:, start:end, ...])
+                else:
+                    dset.read_direct(inp, np.s_[(local_idx - self.dt * self.n_history) : (local_idx + 1) : self.dt, slice_in, start_x:end_x, start_y:end_y], np.s_[:, start:end, ...])
             else:
                 inp[(local_idx - self.dt * self.n_history) : (local_idx + 1) : self.dt, slice_in, start_x:end_x, start_y:end_y] = dset[:, start:end, ...]
 
@@ -175,9 +178,14 @@ class GeneralES(object):
 
             # read the data
             if self.read_direct:
-                dset.read_direct(
-                    tar, np.s_[(local_idx + self.dt) : (local_idx + self.dt * (self.n_future + 1) + 1) : self.dt, slice_out, start_x:end_x, start_y:end_y], np.s_[:, start:end, ...]
-                )
+                if self.dt == 0:
+                    dset.read_direct(
+                        tar, np.s_[(local_idx + self.dt) : (local_idx + self.dt * (self.n_future + 1) + 1), slice_out, start_x:end_x, start_y:end_y], np.s_[:, start:end, ...]
+                    )
+                else:
+                    dset.read_direct(
+                        tar, np.s_[(local_idx + self.dt) : (local_idx + self.dt * (self.n_future + 1) + 1) : self.dt, slice_out, start_x:end_x, start_y:end_y], np.s_[:, start:end, ...]
+                    )
             else:
                 tar[(local_idx + self.dt) : (local_idx + self.dt * (self.n_future + 1) + 1) : self.dt, slice_out, start_x:end_x, start_y:end_y] = dset[:, start:end, ...]
 
@@ -362,14 +370,22 @@ class GeneralES(object):
         jan_01_epoch = datetime.datetime(year, 1, 1, 0, 0, 0)
 
         # zenith angle for input
-        inp_times = np.asarray([jan_01_epoch + datetime.timedelta(hours=idx * self.dhours) for idx in range(local_idx - self.dt * self.n_history, local_idx + 1, self.dt)])
+        if self.dt == 0:
+            inp_times = np.asarray([jan_01_epoch + datetime.timedelta(hours=idx * self.dhours) for idx in range(local_idx - self.dt * self.n_history, local_idx + 1)])
+        else:
+            inp_times = np.asarray([jan_01_epoch + datetime.timedelta(hours=idx * self.dhours) for idx in range(local_idx - self.dt * self.n_history, local_idx + 1, self.dt)])
         cos_zenith_inp = np.expand_dims(cos_zenith_angle(inp_times, self.lon_grid_local, self.lat_grid_local).astype(np.float32), axis=1)
         zen_inp[...] = cos_zenith_inp[...]
 
         # zenith angle for target:
-        tar_times = np.asarray(
-            [jan_01_epoch + datetime.timedelta(hours=idx * self.dhours) for idx in range(local_idx + self.dt, local_idx + self.dt * (self.n_future + 1) + 1, self.dt)]
-        )
+        if self.dt == 0:
+            tar_times = np.asarray(
+                [jan_01_epoch + datetime.timedelta(hours=idx * self.dhours) for idx in range(local_idx + self.dt, local_idx + self.dt * (self.n_future + 1) + 1)]
+            )
+        else:
+            tar_times = np.asarray(
+                [jan_01_epoch + datetime.timedelta(hours=idx * self.dhours) for idx in range(local_idx + self.dt, local_idx + self.dt * (self.n_future + 1) + 1, self.dt)]
+            )
         cos_zenith_tar = np.expand_dims(cos_zenith_angle(tar_times, self.lon_grid_local, self.lat_grid_local).astype(np.float32), axis=1)
         zen_tar[...] = cos_zenith_tar[...]
 
