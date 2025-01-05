@@ -75,9 +75,11 @@ def get_params(path):
     return ParamsBase.from_json(config)
 
 
-def save_checkpoint(path, output_path, rank, world_size, store_path):
+def save_checkpoint(path, output_path, rank, world_size, store_path, epoch):
     package = LocalPackage(path)
     params = get_params(path)
+    if epoch is not None:
+        params["checkpoint_path"] = params["checkpoint_path"].replace('.tar', '_epoch{}.tar'.format(args.epoch))
     #store = dist.FileStore(store_path, world_size)
     # setup distributed
     #dist.init_process_group(store=store, backend="nccl", rank=rank, world_size=world_size)
@@ -93,7 +95,8 @@ def save_checkpoint(path, output_path, rank, world_size, store_path):
         model_parallel_names = params.get("model_parallel_names", ["model"])
         params.model_parallel_size = comm.init(model_parallel_sizes=model_parallel_sizes, model_parallel_names=model_parallel_names)
         saver = CheckpointSaver(params, world_rank=comm.get_world_rank())
-        saver.restore_checkpoint(checkpoint_path, checkpoint_mode=params["load_checkpoint"])
+        #saver.restore_checkpoint(checkpoint_path, checkpoint_mode=params["load_checkpoint"])
+        saver.restore_checkpoint(checkpoint_path, checkpoint_mode='legacy')
         output_checkpoint_path = os.path.join(output_path, MODEL_PACKAGE_CHECKPOINT_PATH)
         if rank == 0:
             os.makedirs(os.path.dirname(output_checkpoint_path), exist_ok=True)
@@ -125,13 +128,17 @@ if __name__ == "__main__":
         help="for example: sfno_linear_73chq_sc2_layers8_edim960_wstgl2/ngpu256_sp4",
     )
     parser.add_argument("output", help="Where to save the collected checkpoint.")
+    parser.add_argument("--epoch", required=False, default=None, type=int, help='the epoch of the saved model to load')
     args = parser.parse_args()
     f = tempfile.mktemp()
     params = get_params(args.experiment_root)
     nproc = len(params.model_parallel_sizes)
     rank = int(os.environ["RANK"])
     world_size = int(os.environ["WORLD_SIZE"])
-    save_checkpoint(args.experiment_root, args.output, rank, world_size, f)
+    print("nproc {}".format(nproc))
+    print("world size {}".format(world_size))
+    #assert nproc == world_size, "world size must equal the model parallel size as given by the config"
+    save_checkpoint(args.experiment_root, args.output, rank, world_size, f, epoch=args.epoch)
 
     #torch.multiprocessing.spawn(
     #    partial(save_checkpoint, args.experiment_root, args.output),
