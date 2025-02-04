@@ -344,3 +344,17 @@ sfno_linear_74chq_sc6_layers8_edim384_wstgl2:
     n_eval_samples: 32
     log_to_wandb: false
 
+sfno_linear_74chq_sc3_layers8_edim384_dt6h_wstgl2:                        
+    <<: *BASELINE_74CHQ                                                 
+    wandb_group: "sfno_linear_74chq_sc3_layers8_edim384_dt6h_wstgl2-0.1.0" 
+                                                                        
+    embed_dim: 384
+    num_layers: 8                                                          
+    scale_factor: 3
+    hard_thresholding_fraction: 1.0                                     
+    scheduler: "CosineAnnealingLR"                                      
+    max_epochs: 70                                                      
+    scheduler_T_max: 70                                                 
+    loss: "weighted squared temp-std geometric l2"                      
+    valid_autoreg_steps: 1 # number of autoregressive steps for validation, 20 steps in total
+
